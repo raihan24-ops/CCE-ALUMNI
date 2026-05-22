@@ -159,6 +159,11 @@
         </div>
 
         <div class="flex items-center space-x-3">
+            <!-- Dynamic Admin Mode status inside Navbar -->
+            <button id="nav-admin-btn" onclick="openAdminModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 rounded-xl text-xs font-semibold tracking-wide transition-all flex items-center gap-1.5">
+                <i data-lucide="key" class="w-3.5 h-3.5 text-amber-400"></i>
+                <span id="nav-admin-text">Admin Login</span>
+            </button>
             <span class="hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
                 Interactive Global Database
@@ -329,7 +334,7 @@
             <!-- Join/Contribute Widget -->
             <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between">
                 <div>
-                    <h3 class="text-lg font-bold text-white mb-2">Want to Join the Directory?</h3>
+                    <h3 id="sidebar-join-title" class="text-lg font-bold text-white mb-2">Want to Join the Directory?</h3>
                     <p class="text-xs text-gray-400 leading-relaxed">
                         This digital directory represents a robust roster of CCE graduates across several prestigious generations (Batch 5 to Batch 25). Maintain your status by submitting your updated corporate or research credentials.
                     </p>
@@ -341,13 +346,61 @@
                     </div>
                     <span>Currently cataloging <strong>342 members</strong> across standard departments. Batch categorization automatically maps from structural keys.</span>
                 </div>
-                <button onclick="openSubmissionModal()" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all">
-                    Register / Update Profile
-                </button>
+                <div class="flex gap-2">
+                    <!-- Controlled exclusively by admin: behavior updates dynamically in JavaScript -->
+                    <button id="register-btn" onclick="handleRegisterBtnClick()" class="flex-1 py-2.5 text-white font-bold text-xs rounded-xl shadow-lg transition-all">
+                        Unlock to Register / Update
+                    </button>
+                    <button id="sidebar-admin-btn" onclick="openAdminModal()" class="px-3 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/80 rounded-xl transition-all" title="Admin Options">
+                        <i data-lucide="key" class="w-4 h-4 text-amber-400"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
     </main>
+
+    <!-- ADMIN LOGIN MODAL -->
+    <div id="admin-password-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-6 relative">
+            <button onclick="closeAdminModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 mx-auto mb-3 border border-amber-500/20">
+                    <i data-lucide="lock" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Enter Administrator Password</h3>
+                <p class="text-xs text-gray-400 mt-1">Unlock modify, edit, and delete tools for CCE database management.</p>
+            </div>
+            <form onsubmit="handleAdminSubmit(event)" class="space-y-4">
+                <div>
+                    <input type="password" id="admin-password-input" placeholder="••••••••••••••" required class="w-full bg-slate-900/85 border border-slate-700/80 rounded-xl p-3 text-center text-sm text-white focus:outline-none focus:ring-2 focus:ring-amber-500/40">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeAdminModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl text-xs font-semibold">Cancel</button>
+                    <button type="submit" class="flex-1 py-2 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white rounded-xl text-xs font-semibold shadow-lg">Authenticate</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- CUSTOM DELETE CONFIRMATION MODAL -->
+    <div id="delete-confirm-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-sm rounded-3xl p-6 relative border border-rose-500/30">
+            <div class="text-center mb-6">
+                <div class="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 mx-auto mb-3 border border-rose-500/20">
+                    <i data-lucide="trash-2" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Delete Record?</h3>
+                <p class="text-xs text-gray-400 mt-1">Are you sure you want to permanently remove <span id="delete-target-name" class="text-rose-400 font-bold">this alumnus</span> from the official database? This action cannot be undone.</p>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeDeleteModal()" class="flex-1 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl text-xs font-semibold">Cancel</button>
+                <button id="delete-confirm-btn" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-semibold shadow-lg shadow-rose-600/10">Delete Permanently</button>
+            </div>
+        </div>
+    </div>
 
     <!-- UPDATE MODAL (IFRAME SAFE) -->
     <div id="submission-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
@@ -357,7 +410,7 @@
             </button>
             
             <div class="mb-4">
-                <h3 class="text-xl font-bold text-white">Register or Update Your Record</h3>
+                <h3 id="submission-modal-title" class="text-xl font-bold text-white">Register or Update Your Record</h3>
                 <p class="text-xs text-gray-400">Add or revise details inside the CCE database network.</p>
             </div>
 
@@ -930,12 +983,18 @@
             });
         });
 
-        // FILTER GLOBAL STATES
+        // FILTER & ADMIN GLOBAL STATES
         let currentTrack = 'all';
         let searchQuery = '';
         let selectedBatch = 'all';
         let selectedSector = 'all';
         let selectedLocation = 'all';
+        
+        // Admin authorization variables
+        let isAdminActive = false;
+        const ADMIN_PASS = "RASUHAARRA1#@";
+        let editTargetId = null; // Storing studentId during an edit cycle
+        let deleteTargetId = null; // Storing studentId during a delete confirmation
 
         // INITIALIZE APP
         window.onload = function() {
@@ -945,6 +1004,7 @@
             populateBatchDropdown();
             renderDirectory();
             updateDashboardStats();
+            updateAdminUI(); // Set initial button state based on logged-out status
 
             // Link Event listeners
             document.getElementById('nav-search-input').addEventListener('input', function(e) {
@@ -1001,6 +1061,9 @@
         // POPULATE BATCHES
         function populateBatchDropdown() {
             const dropdown = document.getElementById('batch-filter');
+            // Retain "All Batches" and flush rest
+            dropdown.innerHTML = '<option value="all">All Batches</option>';
+            
             // Extract unique batches and sort them
             const batches = [...new Set(alumniData.map(a => a.batch))];
             
@@ -1161,10 +1224,22 @@
                 const cardHtml = `
                     <div class="glass-card rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group">
                         
+                        <!-- Admin overlay indicators if admin is active -->
+                        ${isAdminActive ? `
+                        <div class="absolute top-2 right-2 flex gap-1 z-20">
+                            <button onclick="editAlumnusRecord('${alumnus.studentId}')" class="p-1.5 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 rounded-lg transition-all border border-amber-500/30" title="Edit Alumnus">
+                                <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                            </button>
+                            <button onclick="confirmDeleteRecord('${alumnus.studentId}', '${alumnus.name.replace(/'/g, "\\'")}')" class="p-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white rounded-lg transition-all border border-rose-500/30" title="Delete Alumnus">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
+                        ` : ''}
+
                         <!-- Top header element -->
                         <div>
                             <div class="flex items-start justify-between mb-3">
-                                <div>
+                                <div class="pr-12">
                                     <span class="inline-block px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-lg bg-sky-950/80 border border-sky-800 text-sky-400 mb-2">
                                         ${alumnus.batch}
                                     </span>
@@ -1252,8 +1327,149 @@
             lucide.createIcons();
         }
 
+        // ADMIN CONFIGURATION & LOGIC
+        function openAdminModal() {
+            if (isAdminActive) {
+                // Log out
+                isAdminActive = false;
+                showToast("Admin Session Closed", "You have logged out of Admin mode.");
+                updateAdminUI();
+                renderDirectory();
+            } else {
+                document.getElementById('admin-password-modal').classList.remove('hidden');
+                document.getElementById('admin-password-input').focus();
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-password-modal').classList.add('hidden');
+            document.getElementById('admin-password-input').value = '';
+        }
+
+        function handleAdminSubmit(event) {
+            event.preventDefault();
+            const passInput = document.getElementById('admin-password-input').value;
+            
+            if (passInput === ADMIN_PASS) {
+                isAdminActive = true;
+                closeAdminModal();
+                showToast("Admin Access Granted", "Registration and profile update features unlocked successfully.");
+                updateAdminUI();
+                renderDirectory();
+            } else {
+                showToast("Authentication Failed", "Incorrect password. Admin privileges denied.");
+            }
+        }
+
+        // UPDATE ADMIN DYNAMIC UI ELEMENTS
+        function updateAdminUI() {
+            const regBtn = document.getElementById('register-btn');
+            const sidebarTitle = document.getElementById('sidebar-join-title');
+            const navAdminText = document.getElementById('nav-admin-text');
+            const sidebarAdminBtn = document.getElementById('sidebar-admin-btn');
+
+            if (isAdminActive) {
+                navAdminText.textContent = "Admin Active (Logout)";
+                sidebarAdminBtn.classList.add('bg-amber-500/20', 'border-amber-500/40');
+                sidebarTitle.textContent = "Admin Operations Room";
+                
+                // Emerald active state
+                regBtn.textContent = "Add New Profile";
+                regBtn.className = "flex-1 py-2.5 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all";
+            } else {
+                navAdminText.textContent = "Admin Login";
+                sidebarAdminBtn.classList.remove('bg-amber-500/20', 'border-amber-500/40');
+                sidebarTitle.textContent = "Want to Join the Directory?";
+                
+                // Locked gray state requiring authentication
+                regBtn.textContent = "Unlock to Register / Update";
+                regBtn.className = "flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold text-xs rounded-xl transition-all";
+            }
+        }
+
+        // CONTROL REGISTRATION BUTTON CLICK ACTION
+        function handleRegisterBtnClick() {
+            if (isAdminActive) {
+                openSubmissionModal();
+            } else {
+                openAdminModal();
+            }
+        }
+
+        // EDIT ALUMNUS LOGIC
+        function editAlumnusRecord(studentId) {
+            if (!isAdminActive) return;
+            const alumnus = alumniData.find(a => a.studentId === studentId);
+            if (!alumnus) return;
+
+            editTargetId = studentId;
+
+            // Prepare the registration form as an Edit form
+            document.getElementById('submission-modal-title').textContent = "Edit Alumnus Record";
+            document.getElementById('reg-name').value = alumnus.name;
+            document.getElementById('reg-id').value = alumnus.studentId;
+            document.getElementById('reg-batch').value = alumnus.batch;
+            document.getElementById('reg-track').value = alumnus.track;
+            document.getElementById('reg-org').value = alumnus.company;
+            document.getElementById('reg-desig').value = alumnus.designation;
+            document.getElementById('reg-loc').value = alumnus.location;
+            document.getElementById('reg-linkedin').value = alumnus.linkedin;
+
+            toggleRegTrackFields();
+
+            const isMentor = alumnus.mentor === 'Yes';
+            document.getElementById('reg-mentor').checked = isMentor;
+            if (isMentor) {
+                document.getElementById('mentor-inputs').classList.remove('hidden');
+                document.getElementById('reg-mentor-topics').value = alumnus.mentorTopics || '';
+            } else {
+                document.getElementById('mentor-inputs').classList.add('hidden');
+                document.getElementById('reg-mentor-topics').value = '';
+            }
+
+            openSubmissionModal();
+        }
+
+        // DELETE CONFIRMATION LOGIC
+        function confirmDeleteRecord(studentId, name) {
+            if (!isAdminActive) return;
+            deleteTargetId = studentId;
+            document.getElementById('delete-target-name').textContent = name;
+            document.getElementById('delete-confirm-modal').classList.remove('hidden');
+            
+            // Re-bind confirm button action securely
+            document.getElementById('delete-confirm-btn').onclick = function() {
+                executeDeleteRecord();
+            };
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('delete-confirm-modal').classList.add('hidden');
+            deleteTargetId = null;
+        }
+
+        function executeDeleteRecord() {
+            if (!deleteTargetId || !isAdminActive) return;
+
+            const targetIndex = alumniData.findIndex(a => a.studentId === deleteTargetId);
+            if (targetIndex > -1) {
+                const deletedName = alumniData[targetIndex].name;
+                alumniData.splice(targetIndex, 1);
+                
+                showToast("Record Deleted", `${deletedName} was permanently removed.`);
+                renderDirectory();
+                populateBatchDropdown();
+                updateDashboardStats();
+            }
+            closeDeleteModal();
+        }
+
         // SUBMISSION MODAL ACTIONS
         function openSubmissionModal() {
+            if (!isAdminActive) {
+                showToast("Action Forbidden", "Access denied. Only active administrators can make edits.");
+                return;
+            }
             document.getElementById('submission-modal').classList.remove('hidden');
         }
 
@@ -1261,6 +1477,9 @@
             document.getElementById('submission-modal').classList.add('hidden');
             document.getElementById('submission-form').reset();
             document.getElementById('mentor-inputs').classList.add('hidden');
+            // Reset modal title context
+            document.getElementById('submission-modal-title').textContent = "Register or Update Your Record";
+            editTargetId = null; 
         }
 
         function toggleRegTrackFields() {
@@ -1293,10 +1512,14 @@
 
         function handleRegistrationSubmit(event) {
             event.preventDefault();
+            if (!isAdminActive) {
+                showToast("Action Blocked", "Unauthorised registry submission.");
+                return;
+            }
 
             const isMentorChecked = document.getElementById('reg-mentor').checked;
             
-            const newAlumnus = {
+            const recordData = {
                 name: document.getElementById('reg-name').value,
                 studentId: document.getElementById('reg-id').value,
                 batch: document.getElementById('reg-batch').value,
@@ -1304,7 +1527,7 @@
                 email: "test@domain.com",
                 track: document.getElementById('reg-track').value,
                 company: document.getElementById('reg-org').value || "N/A",
-                industry: document.getElementById('reg-track').value === "Higher Studies" ? "Research" : "IT",
+                industry: document.getElementById('reg-track').value === "Higher Studies" ? "Research & Academia" : "IT Sector",
                 designation: document.getElementById('reg-desig').value || "Associate",
                 location: document.getElementById('reg-loc').value || "Dhaka, Bangladesh",
                 linkedin: document.getElementById('reg-linkedin').value || "",
@@ -1314,15 +1537,28 @@
                 mentorMode: isMentorChecked ? "Online" : ""
             };
 
-            // Add into memory database
-            alumniData.unshift(newAlumnus);
+            if (editTargetId) {
+                // Edit mode
+                const targetIdx = alumniData.findIndex(a => a.studentId === editTargetId);
+                if (targetIdx > -1) {
+                    // Carry forward existing persistent values not present in the editor
+                    recordData.phone = alumniData[targetIdx].phone;
+                    recordData.email = alumniData[targetIdx].email;
+                    recordData.suggestion = alumniData[targetIdx].suggestion;
+                    
+                    alumniData[targetIdx] = recordData;
+                    showToast("Record Modified", `${recordData.name}'s details were updated.`);
+                }
+            } else {
+                // Normal insert mode
+                alumniData.unshift(recordData);
+                showToast("Database Updated Successfully!", `${recordData.name} has been added.`);
+            }
             
             closeSubmissionModal();
             renderDirectory();
+            populateBatchDropdown();
             updateDashboardStats();
-
-            // Fire custom visual notification
-            showToast("Database Updated Successfully!", `${newAlumnus.name} has been added to the local catalog.`);
         }
 
         function triggerDirectMessage(name, email) {
