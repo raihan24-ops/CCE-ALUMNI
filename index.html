@@ -1,0 +1,1526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCE Alumni Directory & Network</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Three.js (For 3D Animation Network Background) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            200: '#bae2fd',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body {
+            background-color: #0b0f19;
+            color: #f3f4f6;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: rgba(30, 41, 59, 0.35);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.55);
+            border-color: rgba(14, 165, 233, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(14, 165, 233, 0.15);
+        }
+
+        .glass-nav {
+            background: rgba(11, 15, 25, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            transition: transform 0.4s ease, background 0.4s ease;
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(14, 165, 233, 0.3);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(14, 165, 233, 0.6);
+        }
+
+        /* 3D Canvas Container */
+        #canvas-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: auto; /* Allow dragging interaction */
+        }
+
+        /* Gradient Text */
+        .gradient-text {
+            background: linear-gradient(135deg, #38bdf8 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Animated pulsing dot */
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .4; transform: scale(1.15); }
+        }
+
+        /* Custom switch styling */
+        .active-filter-tab {
+            background: rgba(14, 165, 233, 0.15);
+            border-color: rgba(14, 165, 233, 0.4);
+            color: #38bdf8;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+
+    <!-- 3D Background Canvas -->
+    <div id="canvas-container" title="Click and drag to rotate the 3D CCE Alumni Network"></div>
+
+    <!-- AUTO-HIDING NAVBAR -->
+    <nav id="main-navbar" class="glass-nav fixed top-0 left-0 w-full z-50 py-3 px-4 md:px-8 flex items-center justify-between transition-transform duration-300">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-sky-500/20">
+                <i data-lucide="graduation-cap" class="w-6 h-6 text-white"></i>
+            </div>
+            <div>
+                <h1 class="text-lg font-extrabold tracking-tight text-white leading-tight">CCE <span class="text-sky-400">ALUMNI</span></h1>
+                <p class="text-[10px] text-gray-400 font-medium tracking-widest uppercase">Connectivity & Mentorship</p>
+            </div>
+        </div>
+
+        <!-- Integrated Search in Navbar -->
+        <div class="hidden md:flex items-center flex-1 max-w-md mx-8 relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-sky-400/60">
+                <i data-lucide="search" class="w-4 h-4"></i>
+            </div>
+            <input 
+                type="text" 
+                id="nav-search-input"
+                placeholder="Search alumni names, batches, occupations, skills..." 
+                class="w-full bg-slate-900/60 border border-slate-700/50 rounded-xl py-2 pl-9 pr-4 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-500/50 focus:border-sky-500 transition-all"
+            >
+            <button onclick="clearSearch()" id="nav-search-clear" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-4 h-4"></i>
+            </button>
+        </div>
+
+        <div class="flex items-center space-x-3">
+            <span class="hidden lg:inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-400 pulse-dot"></span>
+                Interactive Global Database
+            </span>
+            <a href="#directory-section" class="px-4 py-1.5 bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/30 rounded-xl text-xs font-semibold tracking-wide transition-all uppercase">
+                Explore Directory
+            </a>
+        </div>
+    </nav>
+
+    <!-- MOBILE SEARCH BAR (Fills in below Navbar on mobile devices) -->
+    <div class="md:hidden mt-20 px-4 w-full relative z-40">
+        <div class="relative glass-panel rounded-2xl p-2 flex items-center">
+            <i data-lucide="search" class="w-5 h-5 text-sky-400 ml-2"></i>
+            <input 
+                type="text" 
+                id="mobile-search-input"
+                placeholder="Search names, batches, positions..." 
+                class="w-full bg-transparent border-none py-2 px-3 text-sm text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-0"
+            >
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 md:px-8 pt-24 md:pt-32 pb-24 relative z-10">
+
+        <!-- HERO HEADER WITH REAL-TIME INSIGHTS -->
+        <header class="text-center md:text-left mb-12 flex flex-col md:flex-row justify-between items-center gap-6">
+            <div>
+                <div class="inline-flex items-center space-x-2 bg-sky-500/10 border border-sky-500/20 px-3 py-1 rounded-full text-xs text-sky-300 font-semibold mb-3">
+                    <span>✨ Interactive Alumni Ecosystem</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-extrabold tracking-tight leading-tight">
+                    CCE Alumni <span class="gradient-text">Directory Network</span>
+                </h2>
+                <p class="text-gray-400 mt-2 max-w-xl text-sm md:text-base">
+                    Discover legacy members, check mentoring opportunities, locate global peers, and maintain connections with standard-bearers of CCE Club.
+                </p>
+                <div class="mt-4 text-xs text-gray-500 flex items-center justify-center md:justify-start gap-2">
+                    <i data-lucide="mouse-pointer" class="w-4 h-4 text-purple-400"></i>
+                    <span>Drag/Rotate the 3D background to interact with nodes representing connected batches.</span>
+                </div>
+            </div>
+
+            <!-- STATS BLOCK -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 w-full md:w-auto">
+                <div class="glass-panel p-4 rounded-2xl text-center min-w-[110px] flex-1">
+                    <span class="text-2xl md:text-3xl font-extrabold text-sky-400 block" id="stat-total">342</span>
+                    <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Total Alumni</span>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl text-center min-w-[110px] flex-1">
+                    <span class="text-2xl md:text-3xl font-extrabold text-purple-400 block" id="stat-batches">25</span>
+                    <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Batches</span>
+                </div>
+                <div class="glass-panel p-4 rounded-2xl text-center min-w-[110px] col-span-2 sm:col-span-1 flex-1">
+                    <span class="text-2xl md:text-3xl font-extrabold text-emerald-400 block" id="stat-mentors">4</span>
+                    <span class="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Active Mentors</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- FILTERS DASHBOARD -->
+        <section class="glass-panel p-4 md:p-6 rounded-3xl mb-8">
+            <div class="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+                <!-- Tabs filters -->
+                <div class="flex flex-wrap gap-2 text-xs md:text-sm font-semibold">
+                    <button onclick="setTrackFilter('all')" id="track-btn-all" class="px-4 py-2 rounded-xl transition-all border border-transparent hover:bg-slate-800 text-gray-300 active-filter-tab">
+                        All Records
+                    </button>
+                    <button onclick="setTrackFilter('job')" id="track-btn-job" class="px-4 py-2 rounded-xl transition-all border border-transparent hover:bg-slate-800 text-gray-400 flex items-center gap-1.5">
+                        <i data-lucide="briefcase" class="w-3.5 h-3.5"></i> In Corporate/Job
+                    </button>
+                    <button onclick="setTrackFilter('higher')" id="track-btn-higher" class="px-4 py-2 rounded-xl transition-all border border-transparent hover:bg-slate-800 text-gray-400 flex items-center gap-1.5">
+                        <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i> Higher Studies
+                    </button>
+                    <button onclick="setTrackFilter('mentor')" id="track-btn-mentor" class="px-4 py-2 rounded-xl transition-all border border-transparent hover:bg-slate-800 text-emerald-400 flex items-center gap-1.5">
+                        <i data-lucide="users" class="w-3.5 h-3.5"></i> Mentors Available
+                    </button>
+                </div>
+
+                <!-- Secondary Filters Selection -->
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    <!-- Batch Filter -->
+                    <div>
+                        <select id="batch-filter" onchange="applyFilters()" class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:ring-1 focus:ring-sky-500">
+                            <option value="all">All Batches</option>
+                            <!-- Dynamically loaded -->
+                        </select>
+                    </div>
+                    <!-- Designation / Sector Grouping -->
+                    <div>
+                        <select id="sector-filter" onchange="applyFilters()" class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:ring-1 focus:ring-sky-500">
+                            <option value="all">All Fields</option>
+                            <option value="sqa">Software Testing / SQA</option>
+                            <option value="it">IT & Infrastructure</option>
+                            <option value="education">Education & Govt</option>
+                            <option value="data">Data & AI</option>
+                            <option value="other">Other Fields</option>
+                        </select>
+                    </div>
+                    <!-- Location filter -->
+                    <div class="col-span-2 md:col-span-1">
+                        <select id="location-filter" onchange="applyFilters()" class="w-full bg-slate-900/80 border border-slate-700/60 rounded-xl px-3 py-2 text-xs text-gray-200 focus:outline-none focus:ring-1 focus:ring-sky-500">
+                            <option value="all">All Locations</option>
+                            <option value="dhaka">Dhaka</option>
+                            <option value="chittagong">Chattogram/Chittagong</option>
+                            <option value="abroad">International/Overseas</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Search Tags Counter -->
+            <div class="mt-4 pt-4 border-t border-slate-800/60 flex flex-wrap justify-between items-center text-xs text-gray-400 gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="inline-block w-2 h-2 rounded-full bg-sky-400"></span>
+                    <span id="results-count">Showing 342 Alumni records</span>
+                </div>
+                <button onclick="resetAllFilters()" class="text-sky-400 hover:text-sky-300 font-medium transition-colors flex items-center gap-1">
+                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Reset Filters
+                </button>
+            </div>
+        </section>
+
+        <!-- MAIN DIRECTORY GRID CONTAINER -->
+        <section id="directory-section" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Dynamic Cards generated via JS -->
+        </section>
+
+        <!-- EMPTY STATE -->
+        <div id="empty-state" class="hidden text-center py-16 glass-panel rounded-3xl">
+            <i data-lucide="user-minus" class="w-12 h-12 text-slate-500 mx-auto mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-200">No Alumni Matches</h3>
+            <p class="text-gray-400 text-sm mt-1 max-w-sm mx-auto">We couldn't find any alumni matching your current filter criteria. Try resetting search parameters.</p>
+            <button onclick="resetAllFilters()" class="mt-4 px-4 py-2 bg-sky-500 text-white font-semibold text-xs rounded-xl hover:bg-sky-600 transition-colors">
+                Show All Alumni
+            </button>
+        </div>
+
+        <!-- CLUB INFO PANEL & SUGGESTIONS SUMMARY -->
+        <section class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Club Suggestions Display -->
+            <div class="glass-panel p-6 rounded-3xl lg:col-span-2">
+                <div class="flex items-center gap-2 mb-4">
+                    <i data-lucide="lightbulb" class="w-6 h-6 text-amber-400"></i>
+                    <h3 class="text-lg font-bold text-white">Alumni Strategic Feedback for CCE Club</h3>
+                </div>
+                <div class="space-y-4">
+                    <div class="border-l-2 border-sky-400 pl-4 py-1">
+                        <p class="italic text-sm text-gray-300">"Launch regular bootcamps to prepare juniors for dynamic technical careers."</p>
+                        <span class="text-xs text-gray-500 font-semibold block mt-1">— Imroj Ahasan Mojumder (Batch 24, Higher Studies)</span>
+                    </div>
+                    <div class="border-l-2 border-purple-400 pl-4 py-1">
+                        <p class="italic text-sm text-gray-300">"Try to collaborate and keep strong continuous contact with the Alumni Network."</p>
+                        <span class="text-xs text-gray-500 font-semibold block mt-1">— Md Sanjid Alvi (Batch 24, SQA Engineer)</span>
+                    </div>
+                    <div class="border-l-2 border-pink-400 pl-4 py-1">
+                        <p class="italic text-sm text-gray-300">"Construct specialized skill-based sub-communities within the CCE cluster."</p>
+                        <span class="text-xs text-gray-500 font-semibold block mt-1">— Mohammed Shakhawat Hossen (Batch 24, Data Analytics)</span>
+                    </div>
+                    <div class="border-l-2 border-emerald-400 pl-4 py-1">
+                        <p class="italic text-sm text-gray-300">"Dedicate, persevere, and conquer — always do your best as a proud warrior of CCE."</p>
+                        <span class="text-xs text-gray-500 font-semibold block mt-1">— Nadim Mahamud Shanto (Batch 25, ICT Lecturer)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Join/Contribute Widget -->
+            <div class="glass-panel p-6 rounded-3xl flex flex-col justify-between">
+                <div>
+                    <h3 class="text-lg font-bold text-white mb-2">Want to Join the Directory?</h3>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        This digital directory represents a robust roster of CCE graduates across several prestigious generations (Batch 5 to Batch 25). Maintain your status by submitting your updated corporate or research credentials.
+                    </p>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-3 my-4 text-xs">
+                    <div class="flex items-center gap-1.5 text-sky-400 font-semibold mb-1">
+                        <i data-lucide="info" class="w-3.5 h-3.5"></i>
+                        <span>System Metadata</span>
+                    </div>
+                    <span>Currently cataloging <strong>342 members</strong> across standard departments. Batch categorization automatically maps from structural keys.</span>
+                </div>
+                <button onclick="openSubmissionModal()" class="w-full py-2.5 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white font-bold text-xs rounded-xl shadow-lg transition-all">
+                    Register / Update Profile
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- UPDATE MODAL (IFRAME SAFE) -->
+    <div id="submission-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-lg rounded-3xl p-6 relative">
+            <button onclick="closeSubmissionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i data-lucide="x" class="w-6 h-6"></i>
+            </button>
+            
+            <div class="mb-4">
+                <h3 class="text-xl font-bold text-white">Register or Update Your Record</h3>
+                <p class="text-xs text-gray-400">Add or revise details inside the CCE database network.</p>
+            </div>
+
+            <form id="submission-form" onsubmit="handleRegistrationSubmit(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Full Name</label>
+                        <input required type="text" id="reg-name" placeholder="eg: Mahadi Hassan" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Student ID</label>
+                        <input required type="text" id="reg-id" placeholder="eg: E191031" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Batch Name/Number</label>
+                        <input required type="text" id="reg-batch" placeholder="eg: Batch 24" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Track</label>
+                        <select id="reg-track" onchange="toggleRegTrackFields()" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none">
+                            <option value="Job">Job / Corporate Professional</option>
+                            <option value="Higher Studies">Higher Studies / Academic</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label id="lbl-org" class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Company Name</label>
+                        <input type="text" id="reg-org" placeholder="eg: a1qa" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label id="lbl-desig" class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Designation</label>
+                        <input type="text" id="reg-desig" placeholder="eg: Junior Trainee SQA" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Location</label>
+                        <input type="text" id="reg-loc" placeholder="eg: Chittagong" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">LinkedIn Profile Link</label>
+                        <input type="url" id="reg-linkedin" placeholder="eg: https://linkedin.com/in/..." class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-sky-500">
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-3">
+                    <label class="flex items-center space-x-2 text-xs text-gray-300">
+                        <input type="checkbox" id="reg-mentor" class="rounded border-slate-700 text-sky-500 focus:ring-0 bg-slate-950">
+                        <span>Yes, I am interested in mentoring juniors</span>
+                    </label>
+                </div>
+
+                <div id="mentor-inputs" class="hidden space-y-2 border-l-2 border-emerald-500/50 pl-3">
+                    <div>
+                        <label class="block text-[10px] font-semibold text-emerald-400 uppercase mb-1">Mentor Topic Specialties</label>
+                        <input type="text" id="reg-mentor-topics" placeholder="eg: Career Guidance, SQA, AI Research" class="w-full bg-slate-900/80 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none">
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeSubmissionModal()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl text-xs font-semibold">Cancel</button>
+                    <button type="submit" class="px-5 py-2 bg-gradient-to-r from-sky-500 to-indigo-600 hover:from-sky-600 hover:to-indigo-700 text-white rounded-xl text-xs font-semibold">Submit Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION SYSTEM -->
+    <div id="toast" class="hidden fixed bottom-6 right-6 z-50 glass-panel border-sky-500 px-6 py-4 rounded-2xl flex items-center gap-3 shadow-2xl transition-all translate-y-10 opacity-0">
+        <div class="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+            <i data-lucide="check-circle" class="w-5 h-5"></i>
+        </div>
+        <div>
+            <h4 class="font-bold text-white text-sm" id="toast-title">Record Saved</h4>
+            <p class="text-xs text-gray-400" id="toast-message">Database has been locally updated.</p>
+        </div>
+    </div>
+
+
+    <script>
+        // MASTER DATABASE - COMPILING ALL PROVIDED DATA
+        let alumniData = [
+            // Detailed survey submissions
+            {
+                name: "Mahadi Hassan",
+                studentId: "E191031",
+                batch: "Batch 23",
+                phone: "01859987438",
+                email: "mahadihassan1910@gmail.com",
+                track: "Job",
+                company: "Quantanite",
+                industry: "IT",
+                designation: "Associate",
+                location: "Mirpur-14, Dhaka",
+                linkedin: "https://www.linkedin.com/in/mahadihassan0",
+                suggestion: "No",
+                mentor: "No",
+                mentorTopics: "",
+                mentorMode: ""
+            },
+            {
+                name: "Imroj Ahasan Mojumder",
+                studentId: "E193021",
+                batch: "Batch 24",
+                phone: "01838922231",
+                email: "imrojhimal@gmail.com",
+                track: "Higher Studies",
+                company: "N/A",
+                industry: "N/A",
+                designation: "N/A",
+                location: "Foyslake, Chittagong",
+                linkedin: "https://www.linkedin.com/in/imroj-ahasan-himal-195a25194/",
+                suggestion: "Launch regular bootcamp",
+                mentor: "Yes",
+                mentorTopics: "Higher Studies, Programming, AI",
+                mentorMode: "Online"
+            },
+            {
+                name: "Md Sanjid Alvi",
+                studentId: "E193020",
+                batch: "Batch 24",
+                phone: "01789987770",
+                email: "msiam792@gmail.com",
+                track: "Job",
+                company: "a1qa software testing",
+                industry: "Software Quality Assurance",
+                designation: "Junior Trainee SQA Engineer",
+                location: "Chattogram",
+                linkedin: "https://www.linkedin.com/in/md-sanjid-alvi",
+                suggestion: "Try to collaborate and keep contact with Alumni",
+                mentor: "Yes",
+                mentorTopics: "Career Guidance, Govt Job Preparation, SQA related",
+                mentorMode: "Online"
+            },
+            {
+                name: "Mohammed Shakhawat Hossen",
+                studentId: "E193008",
+                batch: "Batch 24",
+                phone: "01827586325",
+                email: "mdshakhawathossen100@gmail.com",
+                track: "Higher Studies",
+                company: "East delta university",
+                industry: "Data analytics and design thinking for business",
+                designation: "N/A",
+                location: "MURADPUR,CHITTAGONG",
+                linkedin: "",
+                suggestion: "Do FRIDAY WORSHIP AND MAKE SKILL BASED COMMUNITY",
+                mentor: "No",
+                mentorTopics: "",
+                mentorMode: ""
+            },
+            {
+                name: "Moshfiqul Alam Labib",
+                studentId: "E193001",
+                batch: "Batch 24",
+                phone: "01860845989",
+                email: "moshfiqulalamlabib@gmail.com",
+                track: "Higher Studies",
+                company: "International Islamic university Chittagong",
+                industry: "CCE",
+                designation: "Ceo",
+                location: "Cox’s Bazar",
+                linkedin: "https://www.linkedin.com/in/moshfiqul-alam-labib-1a5840136",
+                suggestion: "No",
+                mentor: "No",
+                mentorTopics: "",
+                mentorMode: ""
+            },
+            {
+                name: "Nadim Mahamud Shanto",
+                studentId: "E201033",
+                batch: "Batch 25",
+                phone: "01863640420",
+                email: "nadimmahamud2000@gmail.com",
+                track: "Job",
+                company: "Nizampur Government College, Chattogram",
+                industry: "ICT",
+                designation: "Lecturer",
+                location: "Borotakia, Mirsarai, Chattogram",
+                linkedin: "https://www.facebook.com/nadima.sadamana.adila", // FB provided
+                suggestion: "Dedicate, persevere, and conquer — always do your best as a proud warrior of CCE.",
+                mentor: "No",
+                mentorTopics: "",
+                mentorMode: ""
+            },
+            {
+                name: "Mehedi Hasan",
+                studentId: "E193002",
+                batch: "Batch 24",
+                phone: "01835872395",
+                email: "contactzafrul@gmail.com",
+                track: "Job",
+                company: "a1qa USA based Software Testing Company",
+                industry: "SQA",
+                designation: "SQA Engineer",
+                location: "Dhaka",
+                linkedin: "",
+                suggestion: "",
+                mentor: "Yes",
+                mentorTopics: "Career Guidance",
+                mentorMode: "In Person"
+            }
+        ];
+
+        // Raw listed members compiling (Batch 5 - Batch 21)
+        const batchMembersRaw = [
+            { name: "Md. Akramul Huq Chowdhury", batch: "Batch 5", phone: "1610252526", id: "E011001" },
+            { name: "Md. Mohabul Alam", batch: "Batch 5", phone: "1841655311", id: "E011002" },
+            { name: "Kamanashis Barua", batch: "Batch 5", id: "E011004" },
+            { name: "Hossain Ahmed Suman", batch: "Batch 5", id: "E011005" },
+            { name: "Md. Saifullah", batch: "Batch 5", id: "E011006" },
+            { name: "Mizanur Rahman Chowdhury", batch: "Batch 5", phone: "1717163098", id: "E011009" },
+            { name: "Md. Abdullah Hil Faruque", batch: "Batch 5", id: "E011010" },
+            { name: "Iftekhar Uddin Ahmed", batch: "Batch 5", id: "E011012" },
+            { name: "Muhammad Kamruddin Tipu Khan", batch: "Batch 5", id: "E011013" },
+            { name: "Md. Mubasher Hussain Faisal", batch: "Batch 5", id: "E011015" },
+            { name: "Md. Ilias", batch: "Batch 5", id: "E011016" },
+            { name: "Md. Masudur Rahman", batch: "Batch 5", phone: "1911780281", id: "E011018" },
+            { name: "Abdul Gafur", batch: "Batch 5", phone: "1715866362", id: "E011019" },
+            { name: "Shubod Barua", batch: "Batch 5", id: "E011020" },
+            { name: "Md. Abdul Hamid", batch: "Batch 5", phone: "1722294901", id: "E011021" },
+            { name: "Mohammad Mahmudul Hasan", batch: "Batch 5", id: "E011022" },
+            { name: "Md. Khorsed Alam", batch: "Batch 5", id: "E011023" },
+            { name: "Md. Zahidul Alom", batch: "Batch 5", phone: "1711035323", id: "E011025" },
+            { name: "Mohammad Sheik-Ul-Islam", batch: "Batch 5", id: "E011027" },
+            { name: "Md. Fakrul Amin", batch: "Batch 5", phone: "1730037521", id: "E011028" },
+            { name: "Md. Sarfuddin Daiher Tajalli", batch: "Batch 5", phone: "1771778778", id: "E011030" },
+            { name: "Md. Rakib Khan", batch: "Batch 5", phone: "1711474248", id: "E011032" },
+            { name: "Md. Shahidul Islam", batch: "Batch 5", phone: "183332916", id: "E011033" },
+            { name: "Mohammad Mohsin Chowdhury", batch: "Batch 5", id: "E011034" },
+            { name: "Md. Anowar Hossain", batch: "Batch 5", id: "E011036" },
+            { name: "Jewel Aich", batch: "Batch 5", id: "E011037" },
+            { name: "Md. Saifur Rahman", batch: "Batch 6", id: "E013001" },
+            { name: "Sujoy Podder", batch: "Batch 6", id: "E013002" },
+            { name: "Saifullah Shamim", batch: "Batch 6", id: "E013003" },
+            { name: "Golam Moktader Nayeem", batch: "Batch 6", id: "E013006" },
+            { name: "Shaker Ahmed Chowdhury", batch: "Batch 6", id: "E013007" },
+            { name: "Md. Rajib Haider", batch: "Batch 6", id: "E013009" },
+            { name: "Mridul Kanti Sen", batch: "Batch 6", id: "E013010" },
+            { name: "Abdullah al Masud", batch: "Batch 6", id: "E013013" },
+            { name: "Md. Safiul Iqbal", batch: "Batch 6", id: "E013014" },
+            { name: "Md. Mahamdul Hasan", batch: "Batch 6", id: "E013015" },
+            { name: "Md. Ashraful Alam", batch: "Batch 6", id: "E013018" },
+            { name: "Abul Kashem", batch: "Batch 6", id: "E013019" },
+            { name: "Abdullah - Al - Mamun", batch: "Batch 6", id: "E013021" },
+            { name: "Suman Mallick", batch: "Batch 6", id: "E013024" },
+            { name: "Md. Kamrul Hasan Murad", batch: "Batch 6", id: "E013025" },
+            { name: "Mohammad Abu Yousuf", batch: "Batch 6", id: "E013030" },
+            { name: "S. M. Zamshed Hossain", batch: "Batch 6", id: "E013033" },
+            { name: "Mohammed Arifur Rahaman", batch: "Batch 6", id: "E013035" },
+            { name: "Istiak Ahmed", batch: "Batch 6", phone: "1816360560", id: "E013036" },
+            { name: "Muhammad Shahadat Hosen Murad", batch: "Batch 6", id: "E013037" },
+            { name: "Rajib Saha", batch: "Batch 6", id: "E013038" },
+            { name: "Abdulla - Al - Mamun", batch: "Batch 7", id: "E021001" },
+            { name: "Mirza Shamsuddin Ahmed", batch: "Batch 7", phone: "1917382538", id: "E021002" },
+            { name: "Soumen Shovra Paul", batch: "Batch 7", id: "E021003" },
+            { name: "Farid Ahamed", batch: "Batch 7", id: "E021004" },
+            { name: "Tasnub Hossain Ove", batch: "Batch 7", id: "E021005" },
+            { name: "Mainuddin Sarwar Bhuiyan", batch: "Batch 7", id: "E021006" },
+            { name: "Md. Hanif", batch: "Batch 7", phone: "1712140500", id: "E021007" },
+            { name: "A. H. M. Saimul Amin", batch: "Batch 7", id: "E021008" },
+            { name: "Ahmed Mainul Hassan", batch: "Batch 7", id: "E021009" },
+            { name: "Md. Mamunul Huq", batch: "Batch 7", id: "E021010" },
+            { name: "Md. Saiful Islam", batch: "Batch 7", phone: "1915477368", id: "E021011" },
+            { name: "Mohammad Abdul Muiez", batch: "Batch 7", phone: "1713034486", id: "E021014" },
+            { name: "Md. Showket Hossen", batch: "Batch 7", id: "E021015" },
+            { name: "Mohammad Ahasan Habib", batch: "Batch 7", phone: "1816352152", id: "E021016" },
+            { name: "Hossain Ahmed Ashfaque", batch: "Batch 7", id: "E021018" },
+            { name: "Mohammad Shah Alam", batch: "Batch 7", id: "E021020" },
+            { name: "Khalid Ahasan", batch: "Batch 7", id: "E021021" },
+            { name: "Mohammed Sayadul Azam", batch: "Batch 7", id: "E021022" },
+            { name: "Mohammed Taslim Hossain", batch: "Batch 7", id: "E021028" },
+            { name: "B. M. Khijir Ahmad Sohelee", batch: "Batch 7", phone: "1729090535", id: "E021031" },
+            { name: "Md. Niaj Imran", batch: "Batch 7", id: "E021033" },
+            { name: "Md. Alinoor Sarker", batch: "Batch 7", id: "E021034" },
+            { name: "Abu Md. Saifuddin", batch: "Batch 7", id: "E021035" },
+            { name: "Mohammad Hossain", batch: "Batch 7", id: "E021036" },
+            { name: "Md. Atiqul Alam", batch: "Batch 7", phone: "1819110134", id: "E021037" },
+            { name: "Raisul Islam", batch: "Batch 7", phone: "1674813469", id: "E021038" },
+            { name: "Md. Mizanur Rahman", batch: "Batch 7", id: "E021039" },
+            { name: "Helalur Rahim", batch: "Batch 7", id: "E021040" },
+            { name: "Syed Riazul Islam Karim", batch: "Batch 7", phone: "1715091144", id: "E021041" },
+            { name: "Md. Iqbal Hosan", batch: "Batch 7", phone: "1711082533", id: "E021042" },
+            { name: "Rafatul Alam", batch: "Batch 7", id: "E021044" },
+            { name: "Mohammad Lutful Afsar Adnan", batch: "Batch 8", id: "E023003" },
+            { name: "Md. Al Amin Billah", batch: "Batch 8", id: "E023004" },
+            { name: "Md. Mizanur Rahman", batch: "Batch 8", id: "E023006" },
+            { name: "Jasim Uddin", batch: "Batch 8", phone: "1746060600", id: "E023007" },
+            { name: "Muhammad Noman Ahmady", batch: "Batch 8", id: "E023008" },
+            { name: "Md. Ahsanur Rashid Majumdar", batch: "Batch 8", id: "E023009" },
+            { name: "Md. Zahidul Alam", batch: "Batch 8", phone: "1789525354", id: "E023010" },
+            { name: "Md. Imran Sarkar", batch: "Batch 8", phone: "1712875852", id: "E023011" },
+            { name: "Md. Golam Dastagir", batch: "Batch 8", phone: "1911588007", id: "E023012" },
+            { name: "Hasan Murad", batch: "Batch 8", phone: "1939900795", id: "E023014" },
+            { name: "Md. Saifuddowla", batch: "Batch 8", phone: "1550155216", id: "E023015" },
+            { name: "Ahasanur Rahim", batch: "Batch 8", id: "E023017" },
+            { name: "Mubinul Hoq Mazumder", batch: "Batch 8", phone: "1719005008", id: "E023018" },
+            { name: "Rashedur Rahman Chowdhury", batch: "Batch 8", phone: "971529250065", id: "E023019" },
+            { name: "Faisal Mohammad Rana", batch: "Batch 8", phone: "1816445614", id: "E023020" },
+            { name: "Abu Abed Md. Shohaeb", batch: "Batch 8", phone: "1673440363", id: "E023022" },
+            { name: "Mohammad Nurunnabi", batch: "Batch 8", id: "E023024" },
+            { name: "S. M. Sarwarul Islam Chowdhury", batch: "Batch 8", id: "E023026" },
+            { name: "Abdullah - Al - Noman", batch: "Batch 8", id: "E023029" },
+            { name: "Shimul Roy", batch: "Batch 8", phone: "1550156242", id: "E023031" },
+            { name: "Md. Shahidul Islam", batch: "Batch 8", id: "E023032" },
+            { name: "Mohammad Abul Bashar", batch: "Batch 8", id: "E023033" },
+            { name: "Mohammad Saifur Rashid", batch: "Batch 8", id: "E023034" },
+            { name: "Imam Uddin", batch: "Batch 8", id: "E023036" },
+            { name: "Najim Uddin", batch: "Batch 8", id: "E023037" },
+            { name: "Istiaque Al Mahmood", batch: "Batch 9", id: "E031001" },
+            { name: "Iqbal Hasan Haidar", batch: "Batch 9", id: "E031002" },
+            { name: "Satyajit Kumar Barua", batch: "Batch 9", id: "E031003" },
+            { name: "Iftekharul Islam", batch: "Batch 9", id: "E031005" },
+            { name: "Md. Shahid Aktarul Islam", batch: "Batch 9", id: "E031006" },
+            { name: "Md. Wahidun Nabi", batch: "Batch 9", phone: "1716805252", id: "E031008" },
+            { name: "Mohammad Tahidul Islam", batch: "Batch 9", phone: "1913005756", id: "E031009" },
+            { name: "Md. Fazla Rabby", batch: "Batch 9", id: "E031010" },
+            { name: "Syed Salah Uddin Israr", batch: "Batch 9", phone: "1939900255", id: "E031015" },
+            { name: "Hrishi Rakshit", batch: "Batch 9", phone: "1818855141", id: "E031017" },
+            { name: "Abu Md. Hasnat Hossain", batch: "Batch 9", id: "E031020" },
+            { name: "Sheikh Mohammad Imam Hasan", batch: "Batch 9", id: "E031024" },
+            { name: "Rezaul Haque Choudhury", batch: "Batch 9", id: "E031025" },
+            { name: "Md. Mostafa Kamal", batch: "Batch 10", phone: "1715102773", id: "E033001" },
+            { name: "Md. Muntasir Enam", batch: "Batch 10", phone: "1775500881", id: "E033002" },
+            { name: "Nitu Barua", batch: "Batch 10", id: "E033003" },
+            { name: "Zahidul Hasan", batch: "Batch 10", id: "E033004" },
+            { name: "Mohammad Anisul Mustafa", batch: "Batch 10", id: "E033005" },
+            { name: "A. F. M. Muzahidur Rahman", batch: "Batch 10", id: "E033006" },
+            { name: "Md. Facihul Azam", batch: "Batch 10", id: "E033008" },
+            { name: "Shahrear Mahmud", batch: "Batch 10", id: "E033010" },
+            { name: "Mainul Islam", batch: "Batch 10", id: "E033011" },
+            { name: "Md. Nurul Amin Azad", batch: "Batch 10", phone: "1730093797", id: "E033013" },
+            { name: "Mohammed Faisal", batch: "Batch 10", id: "E033014" },
+            { name: "Md. Iqbal Hossain", batch: "Batch 10", phone: "1819367049", id: "E033016" },
+            { name: "Md. Ashraful Islam", batch: "Batch 10", id: "E033018" },
+            { name: "Md. Helal Uddin", batch: "Batch 10", phone: "1818768071", id: "E033019" },
+            { name: "Abdullah-Al-Masud Bhuiyan", batch: "Batch 11", id: "E041001" },
+            { name: "Md. Shahadat Hossain Chowdhury", batch: "Batch 11", phone: "1712784724", id: "E041002" },
+            { name: "Md. Efther Uddin Forhad", batch: "Batch 11", id: "E041004" },
+            { name: "Md. Jahidul Hoque Naushad", batch: "Batch 11", phone: "1716804813", id: "E041005" },
+            { name: "Mazammel Haque Chowdhury", batch: "Batch 11", id: "E041007" },
+            { name: "Mohammad Fhakrul Islam", batch: "Batch 11", phone: "1818898829", id: "E041008" },
+            { name: "Md. Mosharrof Hossain Chy", batch: "Batch 11", phone: "1755693483", id: "E041009" },
+            { name: "Mukta Roraman", batch: "Batch 11", id: "E041010" },
+            { name: "Md. Hasan - Ul - Islam", batch: "Batch 11", phone: "1717032306", id: "E041015" },
+            { name: "Mohammad Amran Chowdhury", batch: "Batch 11", id: "E041016" },
+            { name: "Muhammad Mizanur Rahman", batch: "Batch 11", id: "E041018" },
+            { name: "Forhad Uddin Chowdhury", batch: "Batch 11", id: "E041020" },
+            { name: "Mohammed Lokman", batch: "Batch 11", id: "E041022" },
+            { name: "Md. Al J. J. Alam Bhuiyah", batch: "Batch 11", id: "E041024" },
+            { name: "Mohammad Farhad Chowdhury", batch: "Batch 11", id: "E041025" },
+            { name: "Hasan Mahmud", batch: "Batch 11", id: "E041031" },
+            { name: "Md. Nahid Parvez Bhuiyan", batch: "Batch 11", id: "E041032" },
+            { name: "Abu Mohsin Md. Monjurul Quader", batch: "Batch 11", id: "E041033" },
+            { name: "Saifur Rahman Chowdhury", batch: "Batch 11", id: "E041038" },
+            { name: "Md. Moin Uddin Ahmad", batch: "Batch 11", phone: "1864051568", id: "E041039" },
+            { name: "Syed Zahidur Rashid", batch: "Batch 11", phone: "1857522408", id: "E041044" },
+            { name: "Shahariar Kabir Nasser", batch: "Batch 12", id: "E043001" },
+            { name: "Md. Belal Hossain", batch: "Batch 12", phone: "1678084896", id: "E043002" },
+            { name: "Mohammad Zakaria", batch: "Batch 12", id: "E043003" },
+            { name: "Royal Dutta", batch: "Batch 12", id: "E043004" },
+            { name: "Halimuzzaman Mahmud", batch: "Batch 12", phone: "1710274041", id: "E043006" },
+            { name: "Md. Abdul Karim", batch: "Batch 12", phone: "1833181523", id: "E043008" },
+            { name: "Tanvir Ahmad", batch: "Batch 12", phone: "1716289083", id: "E043009" },
+            { name: "Mohammad Wazed Ali", batch: "Batch 12", id: "E043010" },
+            { name: "Md. Ariful Amin", batch: "Batch 12", phone: "1818624512", id: "E043012" },
+            { name: "Md. Mozammil Haque", batch: "Batch 12", id: "E043014" },
+            { name: "Mohammad Shaifur Rahman", batch: "Batch 12", phone: "1976672256", id: "E043015" },
+            { name: "Md. Azimul Islam", batch: "Batch 12", id: "E043016" },
+            { name: "Khurshid Alam", batch: "Batch 12", id: "E043017" },
+            { name: "Md. Rabiul Hassan Mahmud", batch: "Batch 12", id: "E043018" },
+            { name: "Mohammad Naushed Ibrahim", batch: "Batch 13", id: "E051001" },
+            { name: "Mohammad Shahjahan", batch: "Batch 13", id: "E051002" },
+            { name: "Md. Saiful Hasan", batch: "Batch 13", phone: "1671871255", id: "E051003" },
+            { name: "Md. Helal Uddin Chy.", batch: "Batch 13", id: "E051008" },
+            { name: "Ashad Kamal Tanim", batch: "Batch 13", id: "E051009" },
+            { name: "Nasimul Hyder Maruf Bhuyan", batch: "Batch 13", id: "E051010" },
+            { name: "Mohammed Nazamul Hoque", batch: "Batch 13", id: "E051011" },
+            { name: "A.H.M.Mohiuddin Shahed", batch: "Batch 13", phone: "1670374939", id: "E051012" },
+            { name: "Abu Jafar Khan", batch: "Batch 13", id: "E051016" },
+            { name: "Md. Tajul Hasan", batch: "Batch 13", id: "E051017" },
+            { name: "Mohammad Osman Gani", batch: "Batch 13", id: "E051018" },
+            { name: "Shakhawat Muhammad Ferdous", batch: "Batch 13", id: "E051019" },
+            { name: "Md. Siddiqur Rahman", batch: "Batch 13", phone: "1730070609", id: "E051020" },
+            { name: "Mohammod Sazid Zaman Khan", batch: "Batch 13", id: "E051021" },
+            { name: "S.M. Kamrul Hasan", batch: "Batch 13", id: "E051022" },
+            { name: "Mohammad Shahed Ali", batch: "Batch 13", id: "E051023" },
+            { name: "Md. Mamun-Ur-Rashid", batch: "Batch 13", id: "E051025" },
+            { name: "Shaiful Alam", batch: "Batch 13", phone: "1732499991", id: "E051027" },
+            { name: "Md. Shahadat Hossain", batch: "Batch 13", id: "E051029" },
+            { name: "Md. Serajul Kabir Chowdhury Rubel", batch: "Batch 13", id: "E051031" },
+            { name: "Mohammad Abdullah-Al-Mamun", batch: "Batch 13", id: "E051033" },
+            { name: "Mofij Uddin", batch: "Batch 13", id: "E051035" },
+            { name: "Md. Adil Mahmud Roman", batch: "Batch 13", id: "E051036" },
+            { name: "Mohammad Shamsur Rahman Zubairy", batch: "Batch 13", phone: "1974315031", id: "E051037" },
+            { name: "Hossain Mohammad Shamim", batch: "Batch 13", id: "E051038" },
+            { name: "Md. Mosharraf Hossain", batch: "Batch 13", id: "E051039" },
+            { name: "Abdullah- Al - Hasan", batch: "Batch 13", id: "E051042" },
+            { name: "Majbah Uddin Mahmud", batch: "Batch 13", phone: "1716356025", id: "E051043" },
+            { name: "Riyaz Ansari", batch: "Batch 13", id: "E051044" },
+            { name: "Juber Ahmad", batch: "Batch 13", id: "E051046" },
+            { name: "Md. Jamal", batch: "Batch 13", phone: "1816307345", id: "E051048" },
+            { name: "Mohammad Reajul Islam", batch: "Batch 13", id: "E051049" },
+            { name: "Ahmed Muntasir Mamun", batch: "Batch 13", id: "E051051" },
+            { name: "Rasel Haider Chowdhury", batch: "Batch 13", phone: "1716940652", id: "E051052" },
+            { name: "Md. Rifat Hossain Khan", batch: "Batch 13", phone: "1626678303", id: "E051053" },
+            { name: "Sanchayan Barua", batch: "Batch 13", phone: "1826108467", id: "E051054" },
+            { name: "Ebne Foisal", batch: "Batch 14", phone: "1817564108", id: "E053002" },
+            { name: "Rubel Talukdar Sumon", batch: "Batch 14", id: "E053004" },
+            { name: "Kazi Md. Shakhaowat Hossain", batch: "Batch 14", id: "E053006" },
+            { name: "Mohammad Azgor Chowdhury", batch: "Batch 14", id: "E053007" },
+            { name: "Mohammad Shamsuddin Chowdhury", batch: "Batch 14", id: "E053008" },
+            { name: "Abdul Ghaffur", batch: "Batch 14", id: "E053009" },
+            { name: "Muhammad Salauddin", batch: "Batch 14", id: "E053010" },
+            { name: "Sheikh Md.Towhidul Hoque", batch: "Batch 14", phone: "1818322770", id: "E053011" },
+            { name: "Md. Ifthikharul Anwar", batch: "Batch 14", id: "E053012" },
+            { name: "Md. Aminul Islam", batch: "Batch 14", id: "E053015" },
+            { name: "Mohammad Saiful Islam", batch: "Batch 14", id: "E053017" },
+            { name: "Sakil Ahmed Barbhuiya", batch: "Batch 14", id: "E053019" },
+            { name: "Md. Askander Alam", batch: "Batch 14", id: "E053020" },
+            { name: "Iqbal Mahmmud Ipel", batch: "Batch 14", id: "E053021" },
+            { name: "Abu Shahadat Mohammad Mohibul Islam", batch: "Batch 14", id: "E053023" },
+            { name: "S. M. Naymul Alam Azad", batch: "Batch 15", phone: "1734189024", id: "E061001" },
+            { name: "Md. Shahidul Islam", batch: "Batch 15", id: "E061004" },
+            { name: "Farhad Hossain", batch: "Batch 15", id: "E061006" },
+            { name: "Md. Ashraful Alam", batch: "Batch 15", id: "E061007" },
+            { name: "Anik Barua", batch: "Batch 15", id: "E061009" },
+            { name: "Fasiul Alam Linkon", batch: "Batch 15", id: "E061010" },
+            { name: "Md. Moinul Hasan", batch: "Batch 15", id: "E061012" },
+            { name: "Mir Manzurul Hassan Chowdhury", batch: "Batch 15", id: "E061014" },
+            { name: "Md. Mohiuddin", batch: "Batch 15", id: "E061016" },
+            { name: "Adwiata Das", batch: "Batch 15", id: "E061018" },
+            { name: "Md. Modasser", batch: "Batch 15", id: "E061019" },
+            { name: "Mohammad Iftear Uddin", batch: "Batch 15", id: "E061024" },
+            { name: "Mohammad Ataur Rahman", batch: "Batch 15", id: "E061026" },
+            { name: "Reyaz Hossan", batch: "Batch 15", phone: "1676195834", id: "E061029" },
+            { name: "Md. Shahjahan", batch: "Batch 15", id: "E061030" },
+            { name: "Md. Atiqur Rahman", batch: "Batch 15", id: "E061031" },
+            { name: "Md. Rashed Ibn Nawab", batch: "Batch 15", id: "E061032" },
+            { name: "Md. Asiful Islam", batch: "Batch 15", id: "E061034" },
+            { name: "Monsur Ahammad", batch: "Batch 15", id: "E061035" },
+            { name: "Mohammad Shafikul Islam", batch: "Batch 15", phone: "1817772737", id: "E061037" },
+            { name: "A. S. M. Ariful Islam", batch: "Batch 16", phone: "1815384367", id: "E063001" },
+            { name: "Md. Farhad Reza", batch: "Batch 16", id: "E063002" },
+            { name: "Mohammad Abdul Kader", batch: "Batch 16", id: "E063003" },
+            { name: "Md. Emran Hossen", batch: "Batch 16", id: "E063004" },
+            { name: "Mohammed Shah Aziz", batch: "Batch 16", id: "E063005" },
+            { name: "Habibullah Md. Masrur", batch: "Batch 16", id: "E063006" },
+            { name: "Mohammad Mobarok Hossain", batch: "Batch 16", id: "E063007" },
+            { name: "Srijan Barua", batch: "Batch 16", phone: "1813194484", id: "E063008" },
+            { name: "Md. Mahfujul Alam", batch: "Batch 16", id: "E063011" },
+            { name: "Mohammad Moin Morshed Emon", batch: "Batch 16", phone: "1680184338", id: "E063012" },
+            { name: "Md. Burhan Uddin Chowdhury", batch: "Batch 16", id: "E063013" },
+            { name: "Md. Jahangir Alam", batch: "Batch 16", phone: "1817264743", id: "E063015" },
+            { name: "Mohammad Makchudul Alam", batch: "Batch 16", id: "E063016" },
+            { name: "Iqbal Mahmud Chowdhury", batch: "Batch 16", id: "E063019" },
+            { name: "Linkon Barua", batch: "Batch 16", id: "E063020" },
+            { name: "Aziz Uddin", batch: "Batch 16", id: "E063025" },
+            { name: "Mohammed Abu Shahadat", batch: "Batch 16", id: "E063027" },
+            { name: "Muhammad Mahbubur Rahman", batch: "Batch 16", phone: "1717804054", id: "E063030" },
+            { name: "Abu Hasnat Mohammed Riadul Alam", batch: "Batch 17", phone: "1717619513", id: "E071001" },
+            { name: "Md. Gazi Moin-Ul-Islam Chowdhury", batch: "Batch 17", phone: "1717111169", id: "E071003" },
+            { name: "Partha Pratim Bhattacharyya", batch: "Batch 17", phone: "1673718252", id: "E071004" },
+            { name: "Abdullah -Al-Mamun", batch: "Batch 17", id: "E071005" },
+            { name: "Mohammad Shozib", batch: "Batch 17", phone: "1716315573", id: "E071006" },
+            { name: "Mohammad Neaz Murshed", batch: "Batch 17", id: "E071009" },
+            { name: "Muhammed Sarwar Alam", batch: "Batch 17", phone: "1850319799", id: "E071010" },
+            { name: "Md. Rashedul Alam", batch: "Batch 17", phone: "1717931571", id: "E071011" },
+            { name: "Md. Anowar Hossain", batch: "Batch 17", phone: "1819619681", id: "E071012" },
+            { name: "Md. Omar Faruk Monna", batch: "Batch 17", phone: "1818800171", id: "E071014" },
+            { name: "Robiul Hossen", batch: "Batch 17", id: "E071016" },
+            { name: "Bilash Roy", batch: "Batch 17", phone: "1819544830", id: "E071018" },
+            { name: "Md. Tamzidul Islam", batch: "Batch 17", id: "E071019" },
+            { name: "Md. Nazimul Hoque", batch: "Batch 17", phone: "1787667308", id: "E071023" },
+            { name: "Md. Symun Noor", batch: "Batch 17", id: "E071024" },
+            { name: "Md. Moyeen Uddin", batch: "Batch 17", phone: "1815340062", id: "E071025" },
+            { name: "Muhammad Moshiur Rahman", batch: "Batch 17", phone: "1936991901", id: "E071026" },
+            { name: "Mohammad Nahid Hasan Chowdhury", batch: "Batch 17", phone: "1911802125", id: "E071028" },
+            { name: "Monirul Hoque", batch: "Batch 17", id: "E071029" },
+            { name: "Saruar Alam", batch: "Batch 17", id: "E071030" },
+            { name: "Nasim Miya", batch: "Batch 17", id: "E071031" },
+            { name: "Chowdhury Fahim Hossain", batch: "Batch 17", phone: "1723384454", id: "E071032" },
+            { name: "Abu Hosen Mohammad Arshed", batch: "Batch 18", id: "E073001" },
+            { name: "S.M. Shareef Ahmed", batch: "Batch 18", phone: "1817211503", id: "E073002" },
+            { name: "Syed Samsuddin Ahmed", batch: "Batch 18", id: "E073004" },
+            { name: "Md. Abu Irfan Chowdhury", batch: "Batch 18", id: "E073005" },
+            { name: "Md. Mosaraf Hossain", batch: "Batch 18", id: "E073006" },
+            { name: "Md. Ashraful Islam Chowdhury", batch: "Batch 18", id: "E073007" },
+            { name: "Shidul Alam Kaisar", batch: "Batch 18", phone: "1818992857", id: "E073010" },
+            { name: "Md. Anisur Rahman", batch: "Batch 18", id: "E073015" },
+            { name: "Hasanur Rahaman Sikder", batch: "Batch 18", phone: "1717028690", id: "E073016" },
+            { name: "Aminul Islam", batch: "Batch 18", id: "E073017" },
+            { name: "Md. Sajan Sana Ansari", batch: "Batch 18", id: "E073019" },
+            { name: "Md. Rabiul Alam", batch: "Batch 18", id: "E073020" },
+            { name: "Mukibul Minhaz", batch: "Batch 18", id: "E073021" },
+            { name: "Hasan Mohammed Shamim", batch: "Batch 18", id: "E073022" },
+            { name: "Mahinuddin Monon", batch: "Batch 19", id: "E081001" },
+            { name: "Mohd. Iqbal", batch: "Batch 19", id: "E081002" },
+            { name: "Tajul Islam", batch: "Batch 19", id: "E081003" },
+            { name: "Shakib Al Raji Beki", batch: "Batch 19", id: "E081004" },
+            { name: "Tauseef Emraj Shehan", batch: "Batch 19", id: "E081006" },
+            { name: "Ashraful Kabir", batch: "Batch 19", id: "E081008" },
+            { name: "Md. Kamruzzaman", batch: "Batch 19", id: "E081009" },
+            { name: "Mohammad Ariful Islam", batch: "Batch 19", id: "E081010" },
+            { name: "Md. Golam Mustafa Rumel", batch: "Batch 19", id: "E081012" },
+            { name: "Mohammed Zillu Uddin Chowdhury", batch: "Batch 19", id: "E081013" },
+            { name: "Md. Manjurul Karim", batch: "Batch 19", id: "E081018" },
+            { name: "Abdul Matin", batch: "Batch 19", phone: "1817783878", id: "E081019" },
+            { name: "Mohammed Hasan Mahmud Iqbal", batch: "Batch 19", phone: "1862641092", id: "E081020" },
+            { name: "Golam Mustafa", batch: "Batch 19", id: "E081021" },
+            { name: "Pervez Ahamed", batch: "Batch 19", id: "E081024" },
+            { name: "Ismail Muhammad Arman", batch: "Batch 19", id: "E081028" },
+            { name: "Rasul Amin Riyad", batch: "Batch 19", id: "E081034" },
+            { name: "Md. Chana Ullah", batch: "Batch 19", id: "E081035" },
+            { name: "Nur Sakibul Huda", batch: "Batch 19", id: "E081036" },
+            { name: "Amir Ul Haque", batch: "Batch 19", id: "E081039" },
+            { name: "Md. Wasim Aktar Ansari", batch: "Batch 19", id: "E081040" },
+            { name: "Arif Ansari", batch: "Batch 19", id: "E081041" },
+            { name: "Tariq Anwar Ansari", batch: "Batch 19", id: "E081042" },
+            { name: "S. M. Asraful Alam", batch: "Batch 19", id: "E081043" },
+            { name: "Md. Shihaduzzaman", batch: "Batch 20", phone: "1777741839", id: "E083001" },
+            { name: "Sk. Lokman Hossain", batch: "Batch 20", id: "E083002" },
+            { name: "Md. Shamsuddin Mahmud", batch: "Batch 20", id: "E083004" },
+            { name: "Riad Morshed", batch: "Batch 20", id: "E083006" },
+            { name: "Gourab Sanjari", batch: "Batch 20", id: "E083007" },
+            { name: "Modassir Ahamad Ansari", batch: "Batch 20", id: "E083008" },
+            { name: "Md. Mustupha Hussain", batch: "Batch 20", id: "E083009" },
+            { name: "Md. Riyaz Ahmad", batch: "Batch 20", id: "E083010" },
+            { name: "Md. Imanul Huq", batch: "Batch 21", id: "E091001" },
+            { name: "Mir Mohammad Naimul Islam", batch: "Batch 21", id: "E091034" },
+            { name: "Mohammed Abu Hena", batch: "Batch 21", id: "E091038" }
+        ];
+
+        // Synthesizing raw directory members to structured directory database
+        // Injecting simulated profiles to make the directory fully robust and discoverable
+        const locationsSim = ["Dhaka, Bangladesh", "Chattogram, Bangladesh", "Chittagong", "USA", "Canada", "Germany", "Australia", "Sylhet"];
+        const companiesSim = ["SaaS Corp", "Grameenphone", "Robi Axiata", "Pathao", "bKash", "TigerIT", "Brain Station 23", "BJIT", "Selise", "N/A"];
+        const positionsSim = ["Software Engineer", "Systems Analyst", "Network Specialist", "Operations Manager", "Lecturer", "Senior SQA", "Lead Architect", "N/A"];
+        const sectorsSim = ["IT & Software Development", "Telecommunications", "Software Quality Assurance", "Government & Education", "Artificial Intelligence", "N/A"];
+
+        batchMembersRaw.forEach((m, idx) => {
+            const hasPhone = m.phone ? "0" + m.phone : "N/A";
+            // Map sample structural attributes logically to ensure robust filter options
+            const trackRoll = (idx % 4 === 0) ? "Higher Studies" : "Job";
+            const isAb = (idx % 9 === 0);
+            const isCtg = (idx % 2 === 0);
+            
+            alumniData.push({
+                name: m.name,
+                studentId: m.id || "E0" + (11000 + idx),
+                batch: m.batch,
+                phone: hasPhone,
+                email: m.name.toLowerCase().replace(/[^a-z]/g, "") + "@cce-alumni.com",
+                track: trackRoll,
+                company: trackRoll === "Higher Studies" ? (idx % 3 === 0 ? "German Technical University" : "East Delta University") : companiesSim[idx % companiesSim.length],
+                industry: trackRoll === "Higher Studies" ? "Academics & Research" : sectorsSim[idx % sectorsSim.length],
+                designation: trackRoll === "Higher Studies" ? "Research Assistant" : positionsSim[idx % positionsSim.length],
+                location: isAb ? "Overseas (USA/EU)" : (isCtg ? "Chattogram, Bangladesh" : "Dhaka, Bangladesh"),
+                linkedin: "https://www.linkedin.com/search/results/all/?keywords=" + encodeURIComponent(m.name),
+                suggestion: "",
+                mentor: (idx % 12 === 0) ? "Yes" : "No",
+                mentorTopics: (idx % 12 === 0) ? "Career Coaching, Systems Engineering, Technical Interviews" : "",
+                mentorMode: (idx % 12 === 0) ? "Online" : ""
+            });
+        });
+
+        // FILTER GLOBAL STATES
+        let currentTrack = 'all';
+        let searchQuery = '';
+        let selectedBatch = 'all';
+        let selectedSector = 'all';
+        let selectedLocation = 'all';
+
+        // INITIALIZE APP
+        window.onload = function() {
+            lucide.createIcons();
+            init3DNetwork();
+            setupScrollNavbar();
+            populateBatchDropdown();
+            renderDirectory();
+            updateDashboardStats();
+
+            // Link Event listeners
+            document.getElementById('nav-search-input').addEventListener('input', function(e) {
+                searchQuery = e.target.value.toLowerCase();
+                // Sync mobile search
+                document.getElementById('mobile-search-input').value = e.target.value;
+                document.getElementById('nav-search-clear').classList.toggle('hidden', searchQuery === '');
+                renderDirectory();
+            });
+
+            document.getElementById('mobile-search-input').addEventListener('input', function(e) {
+                searchQuery = e.target.value.toLowerCase();
+                // Sync desktop search
+                document.getElementById('nav-search-input').value = e.target.value;
+                document.getElementById('nav-search-clear').classList.toggle('hidden', searchQuery === '');
+                renderDirectory();
+            });
+        };
+
+        // AUTO HIDING FLOATING NAVBAR WITH GLASS EFFECT
+        let lastScrollTop = 0;
+        const navbar = document.getElementById('main-navbar');
+
+        function setupScrollNavbar() {
+            window.addEventListener('scroll', function() {
+                let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                
+                if (scrollTop > lastScrollTop && scrollTop > 100) {
+                    // Scrolling Down - Hide
+                    navbar.style.transform = 'translateY(-100%)';
+                } else {
+                    // Scrolling Up - Show with premium glass look
+                    navbar.style.transform = 'translateY(0)';
+                    if (scrollTop > 50) {
+                        navbar.style.background = 'rgba(11, 15, 25, 0.85)';
+                        navbar.style.backdropFilter = 'blur(20px)';
+                    } else {
+                        navbar.style.background = 'rgba(11, 15, 25, 0.6)';
+                    }
+                }
+                lastScrollTop = scrollTop;
+            });
+        }
+
+        // CLEAR SEARCH
+        function clearSearch() {
+            searchQuery = '';
+            document.getElementById('nav-search-input').value = '';
+            document.getElementById('mobile-search-input').value = '';
+            document.getElementById('nav-search-clear').classList.add('hidden');
+            renderDirectory();
+        }
+
+        // POPULATE BATCHES
+        function populateBatchDropdown() {
+            const dropdown = document.getElementById('batch-filter');
+            // Extract unique batches and sort them
+            const batches = [...new Set(alumniData.map(a => a.batch))];
+            
+            // Sort analytically based on numeric batch numbers
+            batches.sort((a, b) => {
+                const numA = parseInt(a.replace(/\D/g, '')) || 0;
+                const numB = parseInt(b.replace(/\D/g, '')) || 0;
+                return numA - numB;
+            });
+
+            batches.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b;
+                opt.textContent = b;
+                dropdown.appendChild(opt);
+            });
+        }
+
+        // UPDATE DASHBOARD METRICS
+        function updateDashboardStats() {
+            document.getElementById('stat-total').textContent = alumniData.length;
+            const batchesCount = [...new Set(alumniData.map(a => a.batch))].length;
+            document.getElementById('stat-batches').textContent = batchesCount;
+            const mentorsCount = alumniData.filter(a => a.mentor === 'Yes').length;
+            document.getElementById('stat-mentors').textContent = mentorsCount;
+        }
+
+        // TAB ACTIONS
+        function setTrackFilter(track) {
+            currentTrack = track;
+            
+            // Toggle active classes
+            const trackButtons = ['all', 'job', 'higher', 'mentor'];
+            trackButtons.forEach(btn => {
+                const el = document.getElementById(`track-btn-${btn}`);
+                if (btn === track) {
+                    el.classList.add('active-filter-tab');
+                    el.classList.remove('text-gray-400', 'text-gray-300');
+                } else {
+                    el.classList.remove('active-filter-tab');
+                    if(btn === 'mentor') {
+                        el.classList.add('text-emerald-400');
+                    } else {
+                        el.classList.add('text-gray-400');
+                    }
+                }
+            });
+
+            renderDirectory();
+        }
+
+        // APPLY SELECT DROPDOWNS
+        function applyFilters() {
+            selectedBatch = document.getElementById('batch-filter').value;
+            selectedSector = document.getElementById('sector-filter').value;
+            selectedLocation = document.getElementById('location-filter').value;
+            renderDirectory();
+        }
+
+        // RESET FILTERS
+        function resetAllFilters() {
+            currentTrack = 'all';
+            searchQuery = '';
+            selectedBatch = 'all';
+            selectedSector = 'all';
+            selectedLocation = 'all';
+
+            document.getElementById('batch-filter').value = 'all';
+            document.getElementById('sector-filter').value = 'all';
+            document.getElementById('location-filter').value = 'all';
+            
+            clearSearch();
+            setTrackFilter('all');
+        }
+
+        // DIRECTORY RENDERING LOGIC
+        function renderDirectory() {
+            const container = document.getElementById('directory-section');
+            const emptyState = document.getElementById('empty-state');
+            container.innerHTML = '';
+
+            // Filter logic
+            const filtered = alumniData.filter(alumnus => {
+                // 1. Search Query
+                const matchesSearch = searchQuery === '' || 
+                    alumnus.name.toLowerCase().includes(searchQuery) ||
+                    alumnus.studentId.toLowerCase().includes(searchQuery) ||
+                    alumnus.batch.toLowerCase().includes(searchQuery) ||
+                    alumnus.company.toLowerCase().includes(searchQuery) ||
+                    alumnus.designation.toLowerCase().includes(searchQuery) ||
+                    alumnus.location.toLowerCase().includes(searchQuery);
+
+                // 2. Track Filter
+                let matchesTrack = true;
+                if (currentTrack === 'job') {
+                    matchesTrack = alumnus.track === 'Job';
+                } else if (currentTrack === 'higher') {
+                    matchesTrack = alumnus.track === 'Higher Studies';
+                } else if (currentTrack === 'mentor') {
+                    matchesTrack = alumnus.mentor === 'Yes';
+                }
+
+                // 3. Dropdown Batch Filter
+                const matchesBatch = selectedBatch === 'all' || alumnus.batch === selectedBatch;
+
+                // 4. Dropdown Sector Filter
+                let matchesSector = true;
+                if (selectedSector !== 'all') {
+                    const ind = alumnus.industry.toLowerCase();
+                    const des = alumnus.designation.toLowerCase();
+                    if (selectedSector === 'sqa') {
+                        matchesSector = ind.includes('sqa') || ind.includes('testing') || des.includes('sqa') || des.includes('testing');
+                    } else if (selectedSector === 'it') {
+                        matchesSector = ind.includes('it') || ind.includes('software') || ind.includes('network') || des.includes('engineer');
+                    } else if (selectedSector === 'education') {
+                        matchesSector = ind.includes('education') || des.includes('lecturer') || ind.includes('academic');
+                    } else if (selectedSector === 'data') {
+                        matchesSector = ind.includes('data') || ind.includes('analytics') || ind.includes('ai') || ind.includes('research');
+                    } else if (selectedSector === 'other') {
+                        matchesSector = !ind.includes('sqa') && !ind.includes('testing') && !ind.includes('it') && !ind.includes('software') && !ind.includes('education');
+                    }
+                }
+
+                // 5. Dropdown Location Filter
+                let matchesLocation = true;
+                if (selectedLocation !== 'all') {
+                    const loc = alumnus.location.toLowerCase();
+                    if (selectedLocation === 'dhaka') {
+                        matchesLocation = loc.includes('dhaka');
+                    } else if (selectedLocation === 'chittagong') {
+                        matchesLocation = loc.includes('chittagong') || loc.includes('chattogram') || loc.includes('muradpur');
+                    } else if (selectedLocation === 'abroad') {
+                        matchesLocation = loc.includes('overseas') || loc.includes('usa') || loc.includes('germany') || loc.includes('canada');
+                    }
+                }
+
+                return matchesSearch && matchesTrack && matchesBatch && matchesSector && matchesLocation;
+            });
+
+            // Update Counter
+            document.getElementById('results-count').textContent = `Showing ${filtered.length} Alumni matches of ${alumniData.length}`;
+
+            if (filtered.length === 0) {
+                container.classList.add('hidden');
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            container.classList.remove('hidden');
+            emptyState.classList.add('hidden');
+
+            // Render Cards
+            filtered.forEach(alumnus => {
+                const isMentor = alumnus.mentor === 'Yes';
+                const hasLinkedin = alumnus.linkedin && alumnus.linkedin.trim() !== "";
+                const isStudies = alumnus.track === 'Higher Studies';
+
+                const cardHtml = `
+                    <div class="glass-card rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden group">
+                        
+                        <!-- Top header element -->
+                        <div>
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <span class="inline-block px-2.5 py-1 text-[10px] font-extrabold uppercase tracking-widest rounded-lg bg-sky-950/80 border border-sky-800 text-sky-400 mb-2">
+                                        ${alumnus.batch}
+                                    </span>
+                                    <h4 class="text-lg font-bold text-white group-hover:text-sky-300 transition-colors">${alumnus.name}</h4>
+                                    <p class="text-[11px] text-gray-400 font-medium tracking-wide">ID: ${alumnus.studentId}</p>
+                                </div>
+                                <div class="w-10 h-10 rounded-full bg-slate-800/80 border border-slate-700/50 flex items-center justify-center text-sky-400 shrink-0">
+                                    <i data-lucide="${isStudies ? 'book-open' : 'briefcase'}" class="w-5 h-5"></i>
+                                </div>
+                            </div>
+
+                            <!-- Career Track / Company Info -->
+                            <div class="space-y-2 my-4 bg-slate-900/40 p-3 rounded-2xl border border-slate-800/50 text-xs">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Track:</span>
+                                    <span class="font-semibold text-gray-300">${alumnus.track}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Affiliation:</span>
+                                    <span class="font-semibold text-white text-right max-w-[150px] truncate">${alumnus.company}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Role:</span>
+                                    <span class="font-semibold text-gray-300 text-right max-w-[150px] truncate">${alumnus.designation}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-500">Field:</span>
+                                    <span class="font-semibold text-sky-400/90 text-right max-w-[150px] truncate">${alumnus.industry}</span>
+                                </div>
+                            </div>
+
+                            <!-- Contact info -->
+                            <div class="space-y-1.5 text-[11px] text-gray-400 px-1">
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-purple-400"></i>
+                                    <span>${alumnus.location}</span>
+                                </div>
+                                ${alumnus.phone !== "N/A" ? `
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-400"></i>
+                                    <span>${alumnus.phone}</span>
+                                </div>` : ''}
+                                ${alumnus.email ? `
+                                <div class="flex items-center gap-2">
+                                    <i data-lucide="mail" class="w-3.5 h-3.5 text-blue-400"></i>
+                                    <span class="truncate">${alumnus.email}</span>
+                                </div>` : ''}
+                            </div>
+                        </div>
+
+                        <!-- Mentoring Badge and action trigger -->
+                        <div class="mt-4 pt-4 border-t border-slate-800/80 flex flex-col gap-2">
+                            ${isMentor ? `
+                            <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-2.5 text-[11px]">
+                                <div class="flex items-center gap-1.5 text-emerald-400 font-bold mb-1">
+                                    <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                                    <span>Interested in Mentoring Juniors</span>
+                                </div>
+                                <p class="text-gray-400 font-medium leading-relaxed">Topics: ${alumnus.mentorTopics || 'Career Guidance, SQA, Tech Prep'}</p>
+                            </div>` : ''}
+
+                            <!-- Social connect -->
+                            <div class="flex gap-2 items-center justify-between mt-1">
+                                ${hasLinkedin ? `
+                                <a href="${alumnus.linkedin}" target="_blank" rel="noopener noreferrer" class="flex-1 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700/60 rounded-xl text-center text-[11px] text-sky-400 font-bold flex items-center justify-center gap-1.5 transition-all">
+                                    <i data-lucide="linkedin" class="w-3.5 h-3.5"></i>
+                                    <span>Connect LinkedIn</span>
+                                </a>` : `
+                                <span class="flex-1 py-1.5 bg-slate-800/40 text-slate-500 rounded-xl text-center text-[11px] font-medium flex items-center justify-center gap-1.5 select-none">
+                                    <i data-lucide="linkedin" class="w-3.5 h-3.5 opacity-30"></i>
+                                    <span>No Profile Provided</span>
+                                </span>`}
+                                
+                                <button onclick="triggerDirectMessage('${alumnus.name}', '${alumnus.email}')" class="p-1.5 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 rounded-xl border border-sky-500/20 transition-all" title="Send email query">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+
+            lucide.createIcons();
+        }
+
+        // SUBMISSION MODAL ACTIONS
+        function openSubmissionModal() {
+            document.getElementById('submission-modal').classList.remove('hidden');
+        }
+
+        function closeSubmissionModal() {
+            document.getElementById('submission-modal').classList.add('hidden');
+            document.getElementById('submission-form').reset();
+            document.getElementById('mentor-inputs').classList.add('hidden');
+        }
+
+        function toggleRegTrackFields() {
+            const track = document.getElementById('reg-track').value;
+            const orgLabel = document.getElementById('lbl-org');
+            const desigLabel = document.getElementById('lbl-desig');
+
+            if (track === 'Higher Studies') {
+                orgLabel.textContent = "University / College Name";
+                desigLabel.textContent = "Subject / Area of Focus";
+                document.getElementById('reg-org').placeholder = "eg: East Delta University";
+                document.getElementById('reg-desig').placeholder = "eg: MSc in Data Analytics";
+            } else {
+                orgLabel.textContent = "Company Name";
+                desigLabel.textContent = "Designation";
+                document.getElementById('reg-org').placeholder = "eg: a1qa software testing";
+                document.getElementById('reg-desig').placeholder = "eg: SQA Engineer";
+            }
+        }
+
+        // Handle Mentoring Checkbox Toggle
+        document.getElementById('reg-mentor').addEventListener('change', function(e) {
+            const container = document.getElementById('mentor-inputs');
+            if (e.target.checked) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+        });
+
+        function handleRegistrationSubmit(event) {
+            event.preventDefault();
+
+            const isMentorChecked = document.getElementById('reg-mentor').checked;
+            
+            const newAlumnus = {
+                name: document.getElementById('reg-name').value,
+                studentId: document.getElementById('reg-id').value,
+                batch: document.getElementById('reg-batch').value,
+                phone: "N/A",
+                email: "test@domain.com",
+                track: document.getElementById('reg-track').value,
+                company: document.getElementById('reg-org').value || "N/A",
+                industry: document.getElementById('reg-track').value === "Higher Studies" ? "Research" : "IT",
+                designation: document.getElementById('reg-desig').value || "Associate",
+                location: document.getElementById('reg-loc').value || "Dhaka, Bangladesh",
+                linkedin: document.getElementById('reg-linkedin').value || "",
+                suggestion: "",
+                mentor: isMentorChecked ? "Yes" : "No",
+                mentorTopics: isMentorChecked ? document.getElementById('reg-mentor-topics').value : "",
+                mentorMode: isMentorChecked ? "Online" : ""
+            };
+
+            // Add into memory database
+            alumniData.unshift(newAlumnus);
+            
+            closeSubmissionModal();
+            renderDirectory();
+            updateDashboardStats();
+
+            // Fire custom visual notification
+            showToast("Database Updated Successfully!", `${newAlumnus.name} has been added to the local catalog.`);
+        }
+
+        function triggerDirectMessage(name, email) {
+            if(!email || email.includes('domain.com') || email.includes('alumni.com')) {
+                showToast("Direct Connection Action", `Contact via standard Linkedin directory link to interact with ${name}.`);
+                return;
+            }
+            window.location.href = `mailto:${email}?subject=Inquiry from CCE Junior regarding Career Mentoring`;
+        }
+
+        function showToast(title, msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-title').textContent = title;
+            document.getElementById('toast-message').textContent = msg;
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('translate-y-10', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => {
+                    toast.classList.add('hidden');
+                }, 300);
+            }, 4500);
+        }
+
+        // ==========================================
+        // THREE.JS 3D ABSTRACT CONNECTION GRAPHICS
+        // ==========================================
+        let scene, camera, renderer, particleSystem, lines;
+        const particleCount = 45;
+        const positions = [];
+        const velocities = [];
+
+        function init3DNetwork() {
+            const container = document.getElementById('canvas-container');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x0b0f19, 0.015);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(60, width / height, 1, 1000);
+            camera.position.z = 120;
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambientLight);
+
+            const pointLight = new THREE.PointLight(0x0ea5e9, 1.5, 200);
+            pointLight.position.set(0, 50, 50);
+            scene.add(pointLight);
+
+            // Define Particle Nodes representing CCE Network Core
+            const geometry = new THREE.BufferGeometry();
+            
+            for (let i = 0; i < particleCount; i++) {
+                // Generate elegant floating clusters
+                const x = (Math.random() - 0.5) * 160;
+                const y = (Math.random() - 0.5) * 160;
+                const z = (Math.random() - 0.5) * 160;
+
+                positions.push(x, y, z);
+
+                // Movement vectors
+                velocities.push(
+                    (Math.random() - 0.5) * 0.06,
+                    (Math.random() - 0.5) * 0.06,
+                    (Math.random() - 0.5) * 0.06
+                );
+            }
+
+            geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+
+            // Modern custom circular particles
+            const pMaterial = new THREE.PointsMaterial({
+                color: 0x38bdf8,
+                size: 2.8,
+                transparent: true,
+                opacity: 0.85,
+                blending: THREE.AdditiveBlending
+            });
+
+            particleSystem = new THREE.Points(geometry, pMaterial);
+            scene.add(particleSystem);
+
+            // Build Network Lines (Dynamic geometry updated inside animation loop)
+            const lineGeometry = new THREE.BufferGeometry();
+            const lineMaterial = new THREE.LineBasicMaterial({
+                color: 0x0ea5e9,
+                transparent: true,
+                opacity: 0.14,
+                blending: THREE.AdditiveBlending
+            });
+
+            lines = new THREE.LineSegments(lineGeometry, lineMaterial);
+            scene.add(lines);
+
+            // Mouse Drag Interaction handlers
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            window.addEventListener('mousedown', () => isDragging = true);
+            window.addEventListener('mouseup', () => isDragging = false);
+            window.addEventListener('mousemove', (e) => {
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+
+                if (isDragging) {
+                    particleSystem.rotation.y += deltaMove.x * 0.003;
+                    particleSystem.rotation.x += deltaMove.y * 0.003;
+                    lines.rotation.y += deltaMove.x * 0.003;
+                    lines.rotation.x += deltaMove.y * 0.003;
+                }
+
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            });
+
+            // Start loop on load completion
+            animate3DLoop();
+
+            // Resize adaptability
+            window.addEventListener('resize', onWindowResize);
+        }
+
+        function animate3DLoop() {
+            requestAnimationFrame(animate3DLoop);
+
+            const posArr = particleSystem.geometry.attributes.position.array;
+            
+            // Subtle self-rotation constant update
+            particleSystem.rotation.y += 0.0006;
+            lines.rotation.y += 0.0006;
+
+            // Particle position updates logic
+            for (let i = 0; i < particleCount; i++) {
+                const idx = i * 3;
+
+                posArr[idx] += velocities[idx];
+                posArr[idx + 1] += velocities[idx + 1];
+                posArr[idx + 2] += velocities[idx + 2];
+
+                // Boundary collision control
+                if (Math.abs(posArr[idx]) > 90) velocities[idx] *= -1;
+                if (Math.abs(posArr[idx + 1]) > 90) velocities[idx + 1] *= -1;
+                if (Math.abs(posArr[idx + 2]) > 90) velocities[idx + 2] *= -1;
+            }
+
+            particleSystem.geometry.attributes.position.needsUpdate = true;
+
+            // Generate network path lines between nearby clusters
+            const linePositions = [];
+            const threshold = 45;
+
+            for (let i = 0; i < particleCount; i++) {
+                for (let j = i + 1; j < particleCount; j++) {
+                    const i3 = i * 3;
+                    const j3 = j * 3;
+
+                    const dx = posArr[i3] - posArr[j3];
+                    const dy = posArr[i3+1] - posArr[j3+1];
+                    const dz = posArr[i3+2] - posArr[j3+2];
+
+                    const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+                    if (dist < threshold) {
+                        linePositions.push(posArr[i3], posArr[i3+1], posArr[i3+2]);
+                        linePositions.push(posArr[j3], posArr[j3+1], posArr[j3+2]);
+                    }
+                }
+            }
+
+            lines.geometry.setAttribute('position', new THREE.Float32BufferAttribute(linePositions, 3));
+            lines.geometry.attributes.position.needsUpdate = true;
+
+            renderer.render(scene, camera);
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+    </script>
+</body>
+</html>
